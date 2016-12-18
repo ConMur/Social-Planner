@@ -1,0 +1,12 @@
+<resources>
+    <string name="app_name">Social Planner</string>
+    <string name="greeting_default">Greetings!</string>
+    <string name="greeting_morning">Good Morning</string>
+    <string name="greeting_afternoon">Good Afternoon</string>
+    <string name="greeting_night">Good Evening</string>
+    <string name="availability">You are currently: </string>
+    <string name="free">Free</string>
+    <string name="things_to_do">Things to do:</string>
+    <string name="add_activities">Add</string>
+    <string name="edit_activities">Edit</string>
+</resources>
