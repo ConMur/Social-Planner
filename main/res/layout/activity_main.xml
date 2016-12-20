@@ -1,21 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 
-<GridLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:layout_weight="1"
-    android:paddingBottom="5dp"
-    android:paddingTop="5dp"
-    android:paddingLeft="10dp"
-    android:paddingRight="10dp"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
     android:columnCount="1"
-    android:rowCount="5">
+    android:rowCount="5"
+    android:orientation="vertical">
 
     <TextView
-        android:layout_column="0"
-        android:layout_row="0"
         android:id="@+id/greeting_text"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -30,9 +29,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:columnCount="2"
-        android:rowCount="1"
-        android:layout_column="0"
-        android:layout_row="1">
+        android:rowCount="1">
 
         <TextView
             android:layout_column="0"
@@ -52,24 +49,29 @@
             android:layout_height="wrap_content"
             android:id="@+id/checkBox"
             android:layout_gravity="end"
-            android:textSize="18sp" />
+            android:textSize="18sp"
+            android:onClick="onCheckboxClicked"/>
 
     </GridLayout>
 
     <TextView
-        android:layout_column="0"
-        android:layout_row="2"
         android:id="@+id/things_to_do_text"
         android:text="@string/things_to_do"
-        android:textSize="18sp"/>
+        android:textSize="18sp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+
+    <ListView
+        android:layout_width="match_parent"
+        android:id="@+id/things_to_do"
+        android:layout_weight="1"
+        android:layout_height="0dp">
+    </ListView>
 
     <LinearLayout
-        android:layout_row="4"
         android:layout_gravity="bottom"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_column="0"
-        style="?android:attr/buttonBarStyle">
+        android:layout_height="wrap_content">
 
         <Button
             android:text="@string/add_activities"
@@ -78,7 +80,9 @@
             android:layout_weight="1"
             android:layout_gravity="bottom"
             android:id="@+id/add_activities_button"
+            android:onClick="addActivity"
             style="?android:attr/buttonBarButtonStyle"/>
+
         <Button
             android:text="@string/edit_activities"
             android:layout_width="wrap_content"
@@ -89,12 +93,4 @@
             style="?android:attr/buttonBarButtonStyle"/>
     </LinearLayout>
 
-    <ListView
-        android:layout_column="0"
-        android:layout_row="3"
-        android:layout_width="match_parent"
-        android:id="@+id/things_to_do"
-        android:layout_height="373dp">
-    </ListView>
-
-</GridLayout>
+</LinearLayout>
