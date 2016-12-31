@@ -1,4 +1,5 @@
 <resources>
+    <string name="default_text">Sample Text</string>
     <string name="app_name">Social Planner</string>
     <string name="greeting_default">Greetings!</string>
     <string name="greeting_morning">Good Morning</string>
@@ -9,8 +10,16 @@
     <string name="things_to_do">Things to do:</string>
     <string name="add_activities">Add</string>
     <string name="edit_activities">Edit</string>
-    <string name="cancel_adding_button">Cancel</string>
-    <string name="done_adding_button">Done</string>
+    <string name="cancel_button">Cancel</string>
+    <string name="done_button">Done</string>
     <string name="add_description">Fill in the details below</string>
-    <string name="activity_name">Activity name</string>
+    <string name="activity_name">Activity name:</string>
+    <string name="select_date">Select Date</string>
+    <string name="select_time">Select Time</string>
+    <string name="select_contact">Select Contact</string>
+    <string name="choose_contact">Choose Contact</string>
+    <string name="selected_contact">Selected Contact:</string>
+    <string name="send_plan">Text a friend to come along!</string>
+    <string name="activity_planning_description">This is where you are able to decide the time and date
+    for your activity.  Just fill in the information below to invite a friend with you!</string>
 </resources>

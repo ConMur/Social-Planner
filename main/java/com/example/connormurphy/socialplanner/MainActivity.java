@@ -1,15 +1,13 @@
 package com.example.connormurphy.socialplanner;
 
 import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
-import android.graphics.Color;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
-import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -31,6 +29,7 @@ public class MainActivity extends AppCompatActivity {
 
     // Rolled a die to get a truly random number for this
     private final int ADD_REQUEST_CODE = 4;
+    private final int EDIT_REQUEST_CODE = 96;
 
     public final static String EXTRA_ARRAY_LIST = "com.example.connormurphy.socialplanner.ARRAY_LIST";
     private final String THINGS_TO_DO_FILENAME = "ThingsToDo.txt";
@@ -77,11 +76,14 @@ public class MainActivity extends AppCompatActivity {
             }
         }
 
-       updateListView();
+        updateListView(false);
+
+        ((ListView)findViewById(R.id.things_to_do)).setEnabled(true);
+        ((ListView)findViewById(R.id.things_to_do)).setItemChecked(0, true);
 
         // Determine if the ListView should be enabled or not
         checkBox = (CheckBox) findViewById(R.id.checkBox);
-        changeListViewEnabledState(checkboxChecked);
+        //changeListViewEnabledState(checkboxChecked);
     }
 
     /**
@@ -89,24 +91,53 @@ public class MainActivity extends AppCompatActivity {
      *
      * @param view the view that was clicked
      */
-    public void addActivity(View view) {
-
-        //TODO: look into startActivityForResult
-        //https://stackoverflow.com/questions/10407159/how-to-manage-startactivityforresult-on-android
+    public void onAddPressed(View view) {
         Intent intent = new Intent(this, AddActivity.class);
         intent.putStringArrayListExtra(EXTRA_ARRAY_LIST, thingsToDo);
         startActivityForResult(intent, ADD_REQUEST_CODE);
     }
 
     /**
-     * Updates the ListView with the items in the thingsToDo array
+     * Called when the "Edit" button is pressed to edit the list of activities
+     *
+     * @param view the view that was clicked
      */
-    public void updateListView()
+    public void onEditPressed(View view)
     {
-        ArrayAdapter<String> adapter =
-                new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, thingsToDo);
-        ListView listView = (ListView) findViewById(R.id.things_to_do);
+        // TODO: Look here
+        // https://stackoverflow.com/questions/25149919/highlight-multiple-selected-checked-activated-in-listview
+        //https://stackoverflow.com/questions/8369640/listview-setitemchecked-only-works-with-standard-arrayadapter-does-not-work-w
+       // https://stackoverflow.com/questions/27499287/android-listview-simple-list-item-checked
+    }
+
+    /**
+     * Updates the ListView with the items in the thingsToDo array
+     * @param showCheckBoxes if true, shows checkboxes next to each item in the ListView
+     */
+    public void updateListView(boolean showCheckBoxes) {
+        ArrayAdapter<String> adapter = null;
+        if(showCheckBoxes)
+        {
+            adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_checked, thingsToDo);
+        }
+        else
+        {
+            new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, thingsToDo);
+        }
+
+
+        final ListView listView = (ListView) findViewById(R.id.things_to_do);
         listView.setAdapter(adapter);
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                String selectedFromList = (String) (listView.getItemAtPosition(i));
+
+                Intent intent = new Intent(getApplicationContext(), SelectItem.class);
+                intent.putExtra(SelectItem.ACTIVITY_NAME_EXTRA, selectedFromList);
+                startActivityForResult(intent, EDIT_REQUEST_CODE);
+            }
+        });
     }
 
     public void onCheckboxClicked(View view) {
@@ -156,11 +187,11 @@ public class MainActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        if (requestCode == ADD_REQUEST_CODE) {
-            if(resultCode == Activity.RESULT_OK){
-                thingsToDo = data.getStringArrayListExtra(MainActivity.EXTRA_ARRAY_LIST);
-                updateListView();
-            }
+        if (requestCode == ADD_REQUEST_CODE && resultCode == Activity.RESULT_OK) {
+            thingsToDo = data.getStringArrayListExtra(MainActivity.EXTRA_ARRAY_LIST);
+            updateListView(false);
+        } else if (requestCode == EDIT_REQUEST_CODE && resultCode == Activity.RESULT_OK) {
+            //TODO: finish
         }
     }
 

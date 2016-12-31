@@ -80,7 +80,7 @@
             android:layout_weight="1"
             android:layout_gravity="bottom"
             android:id="@+id/add_activities_button"
-            android:onClick="addActivity"
+            android:onClick="onAddPressed"
             style="?android:attr/buttonBarButtonStyle"/>
 
         <Button
@@ -90,6 +90,7 @@
             android:layout_weight="1"
             android:layout_gravity="bottom"
             android:id="@+id/edit_activities_button"
+            android:onClick="onEditPressed"
             style="?android:attr/buttonBarButtonStyle"/>
     </LinearLayout>
 
