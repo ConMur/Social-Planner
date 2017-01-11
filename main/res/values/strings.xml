@@ -10,6 +10,7 @@
     <string name="things_to_do">Things to do:</string>
     <string name="add_activities">Add</string>
     <string name="edit_activities">Edit</string>
+    <string name="cancel_button">Cancel</string>
     <string name="delete_button">Delete</string>
     <string name="done_button">Done</string>
     <string name="add_description">Fill in the details below</string>

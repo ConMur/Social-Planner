@@ -45,7 +45,8 @@
             android:layout_gravity="bottom"
             android:layout_weight="1"
             android:onClick="finishAdding"
-            android:id="@+id/done_button" />
+            android:id="@+id/done_button"
+            style="?android:attr/buttonBarButtonStyle"/>
 
         <Button
         android:text="@string/cancel_button"
@@ -54,7 +55,8 @@
         android:layout_gravity="bottom"
             android:layout_weight="1"
         android:onClick="cancelAdding"
-        android:id="@+id/cancel_button" />
+        android:id="@+id/cancel_button"
+            style="?android:attr/buttonBarButtonStyle"/>
     </LinearLayout>
 
 </GridLayout>
