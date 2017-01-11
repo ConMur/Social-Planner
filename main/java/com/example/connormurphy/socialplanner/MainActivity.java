@@ -4,9 +4,11 @@ import android.app.Activity;
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -19,7 +21,9 @@ import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Collections;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -38,6 +42,16 @@ public class MainActivity extends AppCompatActivity {
 
     private CheckBox checkBox;
     private boolean checkboxChecked;
+
+    private boolean inEditMode;
+
+    private Button editButton;
+    private Button addButton;
+
+    private ListView listView;
+    private boolean listViewPrevState;
+
+    private ArrayList<Integer> indicesToDelete;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -76,14 +90,23 @@ public class MainActivity extends AppCompatActivity {
             }
         }
 
+        listView = (ListView) findViewById(R.id.things_to_do);
         updateListView(false);
 
-        ((ListView)findViewById(R.id.things_to_do)).setEnabled(true);
-        ((ListView)findViewById(R.id.things_to_do)).setItemChecked(0, true);
+        listView.setEnabled(true);
+        listView.setItemChecked(0, true);
 
         // Determine if the ListView should be enabled or not
         checkBox = (CheckBox) findViewById(R.id.checkBox);
-        //changeListViewEnabledState(checkboxChecked);
+        changeListViewEnabledState(checkboxChecked);
+        listViewPrevState = checkboxChecked;
+
+        inEditMode = false;
+
+        editButton = (Button) findViewById(R.id.edit_activities_button);
+        addButton = (Button) findViewById(R.id.add_activities_button);
+
+        indicesToDelete = new ArrayList<>();
     }
 
     /**
@@ -92,9 +115,13 @@ public class MainActivity extends AppCompatActivity {
      * @param view the view that was clicked
      */
     public void onAddPressed(View view) {
-        Intent intent = new Intent(this, AddActivity.class);
-        intent.putStringArrayListExtra(EXTRA_ARRAY_LIST, thingsToDo);
-        startActivityForResult(intent, ADD_REQUEST_CODE);
+        if (inEditMode) {
+            deleteFromListView();
+        } else {
+            Intent intent = new Intent(this, AddActivity.class);
+            intent.putStringArrayListExtra(EXTRA_ARRAY_LIST, thingsToDo);
+            startActivityForResult(intent, ADD_REQUEST_CODE);
+        }
     }
 
     /**
@@ -102,48 +129,92 @@ public class MainActivity extends AppCompatActivity {
      *
      * @param view the view that was clicked
      */
-    public void onEditPressed(View view)
-    {
-        // TODO: Look here
-        // https://stackoverflow.com/questions/25149919/highlight-multiple-selected-checked-activated-in-listview
-        //https://stackoverflow.com/questions/8369640/listview-setitemchecked-only-works-with-standard-arrayadapter-does-not-work-w
-       // https://stackoverflow.com/questions/27499287/android-listview-simple-list-item-checked
+    public void onEditPressed(View view) {
+        inEditMode = !inEditMode;
+
+        if (inEditMode) {
+            editButton.setText(R.string.done_button);
+
+            //change add button to say delete
+            addButton.setText(R.string.delete_button);
+
+            listViewPrevState = listView.isEnabled();
+            //Ensure the list view is enabled in order to select items
+            changeListViewEnabledState(true);
+        } else {
+            editButton.setText(R.string.edit_activities);
+
+            // Change add button back to add
+            addButton.setText(R.string.add_activities);
+
+            //Set the listview back to what it was before editing
+            changeListViewEnabledState(listViewPrevState);
+        }
+
+        updateListView(inEditMode);
     }
 
     /**
-     * Updates the ListView with the items in the thingsToDo array
-     * @param showCheckBoxes if true, shows checkboxes next to each item in the ListView
+     * Changes the list view to enabled if the "Free" check box is clicked and disables the
+     * list view otherwise.
+     *
+     * @param view the view that was pressed
      */
-    public void updateListView(boolean showCheckBoxes) {
-        ArrayAdapter<String> adapter = null;
-        if(showCheckBoxes)
-        {
-            adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_checked, thingsToDo);
-        }
-        else
-        {
-            new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, thingsToDo);
-        }
-
-
-        final ListView listView = (ListView) findViewById(R.id.things_to_do);
-        listView.setAdapter(adapter);
-        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                String selectedFromList = (String) (listView.getItemAtPosition(i));
-
-                Intent intent = new Intent(getApplicationContext(), SelectItem.class);
-                intent.putExtra(SelectItem.ACTIVITY_NAME_EXTRA, selectedFromList);
-                startActivityForResult(intent, EDIT_REQUEST_CODE);
-            }
-        });
-    }
-
     public void onCheckboxClicked(View view) {
         boolean checked = ((CheckBox) view).isChecked();
 
         changeListViewEnabledState(checked);
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+
+        //Write contents of the list view to a file
+        saveActivitiesToFile(thingsToDo);
+    }
+
+    /**
+     * Updates the ListView with the items in the thingsToDo array
+     *
+     * @param showCheckBoxes if true, shows checkboxes next to each item in the ListView
+     */
+    public void updateListView(boolean showCheckBoxes) {
+        ArrayAdapter<String> adapter;
+        if (showCheckBoxes) {
+            adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_multiple_choice, thingsToDo);
+            listView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
+        } else {
+            adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, thingsToDo);
+            listView.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
+        }
+
+
+        listView.setAdapter(adapter);
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                // Only go to the next intent when the user is not in edit mode
+                if (!inEditMode) {
+                    String selectedFromList = (String) (listView.getItemAtPosition(i));
+
+                    Intent intent = new Intent(getApplicationContext(), SelectItem.class);
+                    intent.putExtra(SelectItem.ACTIVITY_NAME_EXTRA, selectedFromList);
+                    startActivityForResult(intent, EDIT_REQUEST_CODE);
+                }
+                // Track which items to delete
+                else {
+                    //If the index is already in the list, remove it
+                    if (indicesToDelete.contains(i)) {
+                        // Do it this way so the value of the index is removed not the particular
+                        //   index in the indiciesToRemove array
+                        indicesToDelete.remove(Integer.valueOf(i));
+                    } else {
+                        indicesToDelete.add(i);
+                    }
+                }
+            }
+        });
     }
 
     /**
@@ -161,6 +232,16 @@ public class MainActivity extends AppCompatActivity {
         } else {
             listView.setEnabled(false);
             listView.setAlpha(0.33f);
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == ADD_REQUEST_CODE && resultCode == Activity.RESULT_OK) {
+            thingsToDo = data.getStringArrayListExtra(MainActivity.EXTRA_ARRAY_LIST);
+            updateListView(false);
         }
     }
 
@@ -183,22 +264,29 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
+    /**
+     * Deletes all elements in the list view that are at the indices as defined by the
+     * indicesToDelete arraylist
+     */
+    private void deleteFromListView() {
+        // Sort the indices to ensure deletion works properly
+        Collections.sort(indicesToDelete);
 
-        if (requestCode == ADD_REQUEST_CODE && resultCode == Activity.RESULT_OK) {
-            thingsToDo = data.getStringArrayListExtra(MainActivity.EXTRA_ARRAY_LIST);
-            updateListView(false);
-        } else if (requestCode == EDIT_REQUEST_CODE && resultCode == Activity.RESULT_OK) {
-            //TODO: finish
+        int size = indicesToDelete.size();
+        int thingsRemoved = 0;
+        System.out.println("contents: " + TextUtils.join(", ", indicesToDelete));
+
+//TODO: find out why no work :(
+        for (int i = 0; i < size; ++i)
+        {
+            thingsToDo.remove(indicesToDelete.get(i) - thingsRemoved);
+            thingsRemoved++;
         }
+
+        // Notify the listview that things have changed
+        updateListView(checkboxChecked);
+        // Reset the array list after deleting
+        indicesToDelete.clear();
     }
 
-    @Override
-    public void onPause() {
-        super.onPause();
-        //Write contents of the list view to a file
-        saveActivitiesToFile(thingsToDo);
-    }
 }
