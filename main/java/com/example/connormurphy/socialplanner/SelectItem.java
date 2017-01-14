@@ -100,7 +100,7 @@ public class SelectItem extends AppCompatActivity {
 
             String textMessage =
                     "Want to " + ((TextView)findViewById(R.id.activity_name)).getText()
-                    + " on " + strDate +  " at " + hour + ":" + minute + period + "?";
+                    + " on " + strDate +  " at " + hour + ":" + String.format("%02d", minute) + period + "?";
 
             //Start the text messaging app with the template text message
             Intent smsIntent = new Intent(Intent.ACTION_VIEW);

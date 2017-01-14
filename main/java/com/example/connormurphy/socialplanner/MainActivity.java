@@ -274,9 +274,7 @@ public class MainActivity extends AppCompatActivity {
 
         int size = indicesToDelete.size();
         int thingsRemoved = 0;
-        System.out.println("contents: " + TextUtils.join(", ", indicesToDelete));
 
-//TODO: find out why no work :(
         for (int i = 0; i < size; ++i)
         {
             thingsToDo.remove(indicesToDelete.get(i) - thingsRemoved);
@@ -284,7 +282,7 @@ public class MainActivity extends AppCompatActivity {
         }
 
         // Notify the listview that things have changed
-        updateListView(checkboxChecked);
+        updateListView(true);
         // Reset the array list after deleting
         indicesToDelete.clear();
     }
